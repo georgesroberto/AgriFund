@@ -1,75 +1,67 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../views/loan_view.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend/views/loan_view.dart';
+import 'package:frontend/components/loan_card.dart';
 
-class LoanScreen extends StatefulWidget {
-  // Add the key parameter to the constructor
+class LoanScreen extends StatelessWidget {
   const LoanScreen({super.key});
-
-  @override
-  _LoanScreenState createState() => _LoanScreenState();
-}
-
-class _LoanScreenState extends State<LoanScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _amountController = TextEditingController();
-  final LoanView _loanView = LoanView(); // Instance of LoanView
-
-  @override
-  void dispose() {
-    _amountController.dispose();
-    super.dispose();
-  }
-
-  void _submitLoanApplication() async {
-    if (_formKey.currentState!.validate()) {
-      final amount = double.parse(_amountController.text);
-      const token = 'your_jwt_token_here'; // Replace with stored JWT token
-
-      try {
-        await _loanView.applyForLoan(amount, token);
-        if (kDebugMode) {
-          print('Loan submitted successfully');
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error applying for loan: $e');
-        }
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Apply for a Loan'),
+        title: const Text('Loans'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _amountController,
-                decoration: const InputDecoration(labelText: 'Loan Amount'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a loan amount';
-                  }
-                  return null;
+      body: Consumer<LoanView>(
+        builder: (context, loanView, child) {
+          if (loanView.allLoans.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return ListView.builder(
+            itemCount: loanView.allLoans.length,
+            itemBuilder: (context, index) {
+              final loan = loanView.allLoans[index];
+
+              return LoanCard(
+                loan: loan,
+                onApplyNow: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('Confirm Loan Application'),
+                        content: Text(
+                          'Are you sure you want to apply for the loan:\n\n'
+                          'Name: ${loan.name}\n'
+                          'Principal: Ksh ${loan.principal.toStringAsFixed(2)}\n'
+                          'Rate: ${loan.interestRate.toStringAsFixed(2)}%\n'
+                          'Term: ${loan.loanTermDays} days\n'
+                          'Total Repayment: Ksh ${loan.calculateTotalAmount().toStringAsFixed(2)}',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // Add your apply loan logic here
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Apply'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitLoanApplication,
-                child: const Text('Submit'),
-              ),
-            ],
-          ),
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }

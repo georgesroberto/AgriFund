@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'screens/invest_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/loan_screen.dart';
 import 'screens/reward_screen.dart';
 import 'screens/wallet_screen.dart';
+import 'views/loan_view.dart';
 
-void main() => runApp(const LoanApp());
+void main() => runApp(
+      ChangeNotifierProvider(
+        create: (context) => LoanView(),
+        child: const LoanApp(),
+      ),
+    );
 
 class LoanApp extends StatelessWidget {
   const LoanApp({super.key});
