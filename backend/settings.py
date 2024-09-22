@@ -24,9 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-zdtj6vfxs54*8xomno&gy1)jzse6q41yh*r3h^mlivg(9#nbce'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['agrifund.onrender.com', 'localhost', '127.0.0.1']
+
 
 
 # Application definition
